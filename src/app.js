@@ -1,5 +1,5 @@
 import React from 'react';
-import DragDropUpload from './drag-drop-upload'
+import DragDropUpload from './components/drag-drop-upload/drag-drop-upload'
 import './app.scss';
 
 function App() {

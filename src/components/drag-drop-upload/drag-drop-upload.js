@@ -1,6 +1,7 @@
 import React from 'react';
-import {getRotationToPoint, distanceToPoint, classList} from './utils/elements';
-import {waitFor} from './utils/wait-for';
+import {getRotationToPoint, distanceToPoint, classList} from '../../utils/elements';
+import {waitFor} from '../../utils/wait-for';
+import DragDropUploadEntry from '../drag-drop-upload-entry/drag-drop-upload-entry'
 
 export default class DragDropUpload extends React.Component {
   constructor(props) {
@@ -28,7 +29,7 @@ export default class DragDropUpload extends React.Component {
   }
 
   componentDidMount() {
-    const dropContainer = document.querySelector('.drop') || this.state.placeholderElement;
+    const dropContainer = document.querySelector('.drop');
     this.setState({
       dropContainer,
       circle: dropContainer.querySelector('.circle'),
@@ -38,8 +39,6 @@ export default class DragDropUpload extends React.Component {
 
   getRotationCSS() {
     const el = this.state.dropContainer || this.state.placeholderElement;
-    el.style['--r'] = getRotationToPoint(el, this.state.mouse.x, this.state.mouse.y) + 'deg';
-    console.log(el.style['--r'], getRotationToPoint(el, this.state.mouse.x, this.state.mouse.y) + 'deg');
     return {
       '--r': getRotationToPoint(el, this.state.mouse.x, this.state.mouse.y) + 'deg'
     };
@@ -68,9 +67,8 @@ export default class DragDropUpload extends React.Component {
     });
 
     // 144 is the offset between circle and its container
-    if (!this.state.circle) return;
-
     let distance = distanceToPoint(this.state.circle, this.state.mouse.x, this.state.mouse.y) / 144;
+
     this.setState({ hovering: distance < .3 });
 
     if (this.state.hovering) {
@@ -92,9 +90,9 @@ export default class DragDropUpload extends React.Component {
   async drop(e) {
     e.preventDefault();
 
-    for (let i = 0; i < e.dataTransfer.files.length; i++) {
-      this.state.files.push(e.dataTransfer.files[i]);
-    }
+    this.setState({
+      files: Array.from(e.dataTransfer.files),
+    });
 
     if (!this.state.dropped) {
       this.setState({ dropped: true });
@@ -119,10 +117,10 @@ export default class DragDropUpload extends React.Component {
   render() {
     return <div
       className={this.getClasses()}
+      style={this.getRotationCSS()}
       onDragLeave={this.dragLeave}
       onDragOver={this.dragOver}
       onDrop={this.drop}
-      style={this.getRotationCSS()}
     >
       <nav>
         <ul>
@@ -160,7 +158,17 @@ export default class DragDropUpload extends React.Component {
         </div>
       </div>
       <div className="hint">Drop your files to upload</div>
-      <ul className="list"></ul>
+      <ul className="list">
+        {
+          this.state.files.map((file, key) => (
+            <DragDropUploadEntry
+              file={file}
+              key={key}
+            />)
+          )
+        }
+      </ul>
+
     </div>
   }
 }
